@@ -1,0 +1,3 @@
+pyactiveresource>=2.1.2
+PyYAML
+six
