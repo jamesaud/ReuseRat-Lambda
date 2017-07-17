@@ -18,7 +18,7 @@ SHOPIFY_SHOP_URL = "https://{api_key}:{password}@{shop_name}/admin/".format(api_
                                                                    password=SHOPIFY_PASSWORD,
                                                                    shop_name=SHOPIFY_APP_NAME)
 
-
+MIN_PRICE_TO_DECREASE = os.getenv("MIN_PRICE_TO_DECREASE")  # In dollars
 
 # Fix import errors by requiring the variable to be set
 if PERCENT_TO_DECREASE and PERCENT_TO_DECREASE > 5:
@@ -27,6 +27,7 @@ if PERCENT_TO_DECREASE and PERCENT_TO_DECREASE > 5:
 if DAYS_TO_DECREASE_PRICE and DAYS_TO_DECREASE_PRICE < 7:
     raise ValueError("Are you sure you want to decrease prices faster than a week?")
 
+
 def get_product_last_updated_date(product: shopify.product):
     split = product.updated_at.replace("T", "-").split("-")
     year, month, day = int(split[0]), int(split[1]), int(split[2])
@@ -34,6 +35,12 @@ def get_product_last_updated_date(product: shopify.product):
 
 
 def should_decrease_price(product: shopify.product):
+
+    # Don't decrease price if it's at 4 dollars or less
+    for variant in  product.variants:
+        if variant.price < 4:
+            return False
+
     last_updated = get_product_last_updated_date(product)
     today = date.today()
     delta = today - last_updated

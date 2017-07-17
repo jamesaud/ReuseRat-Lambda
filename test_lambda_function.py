@@ -10,6 +10,8 @@ import lambda_function
 
 lambda_function.DAYS_TO_DECREASE_PRICE = 7
 lambda_function.PERCENT_TO_DECREASE = 5   # Decrease by 5% per week
+lambda_function.MIN_PRICE_TO_DECREASE = 4   # Decrease by 5% per week
+
 
 
 variant_format =  lambda: {
@@ -71,6 +73,13 @@ class Tests(unittest.TestCase):
         bool = should_decrease_price(self.product)
         self.assertTrue(bool)
 
+
+        # Less than MIN_PRICE_TO_DECREASE, shouldn't decrease price
+        self.product.variants[0].price = lambda_function.MIN_PRICE_TO_DECREASE - 1
+        bool = should_decrease_price(self.product)
+        self.assertFalse(bool)
+
+
     def test_calculate_amount_to_decrease(self):
         amount = calculate_amount_to_decrease()
         self.assertTrue(amount, 1 - .01 * lambda_function.PERCENT_TO_DECREASE)
@@ -81,6 +90,9 @@ class Tests(unittest.TestCase):
         new_price = self.product.variants[0].price
 
         self.assertEqual(old_price * calculate_amount_to_decrease(), new_price)
+
+
+
 
 
 
