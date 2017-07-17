@@ -45,7 +45,7 @@ def should_decrease_price(product: shopify.product):
 
     # Don't decrease price if it's at 4 dollars or less
     for variant in  product.variants:
-        if variant.price < 4:
+        if float(variant.price) < 4:
             return False
 
     last_updated = get_product_last_updated_date(product)
@@ -74,12 +74,11 @@ def update_products():
     products = shopify.Product.find()  # Get a list of all products
     for product in products:
         if should_decrease_price(product):
-            print("Decreasing price: {}".format(product))
+            print("Decreasing price by {0}%: {1}".format(PERCENT_TO_DECREASE, product))
             decrease_variant_prices(product)
-        try:
             product.save()
-        except Exception as e:
-            print("Failed to Save Product: {}".format(e))
+    else:
+        print("No products old enough to decrease.")
 
 def lambda_handler(event, context):
     update_products()
